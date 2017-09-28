@@ -35,25 +35,29 @@ type request_settings struct {
 	Auth_url    string     `toml:"auth_url"`
 }
 
+func (rs *request_settings) Def_headers_map() map[string]string {
+
+	headers := map[string]string{}
+	def_header_count := len(rs.Def_headers[0])
+	for i := 0; i < def_header_count; i++ {
+		headers[rs.Def_headers[0][i]] = rs.Def_headers[1][i]
+
+	}
+	return headers
+
+}
+
 var set settings
 
 func main() {
 	toml.DecodeFile(CONFIG_PATH, &set)
-
-	headers := map[string]string{}
-	def_header_count := len(set.Req.Def_headers[0])
-	for i := 0; i < def_header_count; i++ {
-		headers[set.Req.Def_headers[0][i]] = set.Req.Def_headers[1][i]
-
-	}
-	fmt.Printf("%s\r\n", set.Req.Auth_url)
-	post_req(set.Req.Auth_url, fmt.Sprintf(set.Req.Auth_xml, set.Server.Access_data.User, set.Server.Access_data.Pwd, set.Server.Access_data.Time, set.Server.Access_data.Crypty), headers)
+	post_req(set.Req.Auth_url, fmt.Sprintf(set.Req.Auth_xml, set.Server.Access_data.User, set.Server.Access_data.Pwd, set.Server.Access_data.Time, set.Server.Access_data.Crypty), set.Req.Def_headers_map())
 
 }
 
 func post_req(url string, body string, headers map[string]string) {
 	client := &http.Client{}
-
+	fmt.Printf("%s\r\n", body)
 	req, _ := http.NewRequest("POST", url, strings.NewReader(body))
 	for name, val := range headers {
 		req.Header.Set(name, val)
