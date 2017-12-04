@@ -2,10 +2,11 @@
 package main
 
 import (
+	//	b64 "encoding/base64"
+	//	"encoding/xml"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
+
+	"soap_client/bpm"
 
 	"github.com/BurntSushi/toml"
 )
@@ -15,56 +16,57 @@ const (
 )
 
 type settings struct {
-	Server server_settings  `toml:"server_settings"`
-	Req    request_settings `toml:"request_settings"`
+	Conn_settings conn_settings
+	Req           request_settings             `toml:"request_settings"`
+	Soap_act      map[string]*bpm.Soap_actions `toml:"soap_actions"`
 }
 
-type server_settings struct {
-	Access_data access_settings `toml:"access_settings"`
-}
-
-type access_settings struct {
-	User   string
-	Pwd    string
-	Crypty string
-	Time   int
+type conn_settings struct {
+	User    string
+	Pwd     string
+	Crypty  string
+	Time    int
+	Req_url string
 }
 type request_settings struct {
-	Def_headers [][]string `toml:"default_headers"`
-	Auth_xml    string     `toml:"auth_xml_pattern"`
-	Auth_url    string     `toml:"auth_url"`
+	Def_headers   [][]string `toml:"default_headers"`
+	Auth_xml      string     `toml:"auth_xml_pattern"`
+	Auth_url      string     `toml:"auth_url"`
+	Base_auth_url string
 }
 
-func (rs *request_settings) Def_headers_map() map[string]string {
-
-	headers := map[string]string{}
-	def_header_count := len(rs.Def_headers[0])
-	for i := 0; i < def_header_count; i++ {
-		headers[rs.Def_headers[0][i]] = rs.Def_headers[1][i]
-
-	}
-	return headers
-
+type rLogin struct {
+	RunLoginResult string `xml:"RunLoginResponse>RunLoginResult"`
 }
 
 var set settings
 
 func main() {
 	toml.DecodeFile(CONFIG_PATH, &set)
-	post_req(set.Req.Auth_url, fmt.Sprintf(set.Req.Auth_xml, set.Server.Access_data.User, set.Server.Access_data.Pwd, set.Server.Access_data.Time, set.Server.Access_data.Crypty), set.Req.Def_headers_map())
-
+	fmt.Scanln()
+	fmt.Println(set.Conn_settings.Req_url)
+	bpm_client := bpm.Init(set.Conn_settings.User, set.Conn_settings.Pwd, set.Conn_settings.Crypty, set.Conn_settings.Time, set.Conn_settings.Req_url, set.Soap_act)
+	fmt.Println(bpm_client)
+	//	post_req(set.Req.Auth_url, fmt.Sprintf(set.Req.Auth_xml, set.Server.Access_data.User, set.Server.Access_data.Pwd, set.Server.Access_data.Time), set.Req.Def_headers_map())
+	//	test_simple_req()
+	fmt.Scanln()
+	//test_base_auth()
 }
 
-func post_req(url string, body string, headers map[string]string) {
-	client := &http.Client{}
-	fmt.Printf("%s\r\n", body)
-	req, _ := http.NewRequest("POST", url, strings.NewReader(body))
-	for name, val := range headers {
-		req.Header.Set(name, val)
-	}
-	req.Header.Set("Content-Length", fmt.Sprintf("%d", len(body)))
-	resp, _ := client.Do(req)
-	fmt.Println(resp.StatusCode)
-	responseData, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(responseData))
+func test_simple_req() {
+	//	req_body := fmt.Sprintf(set.Req.Auth_xml, set.Server.Access_data.User, set.Server.Access_data.Pwd, set.Server.Access_data.Time, set.Server.Access_data.Crypty)
+	//	req, _ := http.NewRequest("POST", set.Req.Auth_url, strings.NewReader(req_body))
+
+	//	//	headers := set.Req.Def_headers_map()
+
+	//	//	for name, val := range headers {
+	//	//		req.Header.Set(name, val)
+	//	//	}
+
+	//	client := &http.Client{}
+	//	resp, _ := client.Do(req)
+	//	fmt.Println(resp.StatusCode)
+	//	responseData, _ := ioutil.ReadAll(resp.Body)
+	//	fmt.Println(string(responseData))
+
 }
