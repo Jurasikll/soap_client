@@ -2,8 +2,6 @@
 package main
 
 import (
-	//	b64 "encoding/base64"
-	//	"encoding/xml"
 	"fmt"
 
 	"soap_client/bpm"
@@ -28,15 +26,12 @@ type conn_settings struct {
 	Time    int
 	Req_url string
 }
+
 type request_settings struct {
 	Def_headers   [][]string `toml:"default_headers"`
 	Auth_xml      string     `toml:"auth_xml_pattern"`
 	Auth_url      string     `toml:"auth_url"`
 	Base_auth_url string
-}
-
-type rLogin struct {
-	RunLoginResult string `xml:"RunLoginResponse>RunLoginResult"`
 }
 
 var set settings
