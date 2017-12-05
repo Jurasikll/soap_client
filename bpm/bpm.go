@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	//	"github.com/pborman/uuid"
 )
 
 type BPM struct {
@@ -32,13 +34,25 @@ func Init(user string, pwd string, crypty string, time int, req_url string, acti
 	return b
 }
 
-func (b BPM) get_token() {
+func (b *BPM) get_token() {
 	act := "get_token"
 
 	req := b.create_post_req(act, b.user, b.pwd, b.time, b.crypty)
 	resp, _ := b.client.Do(req)
 	responseData, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(responseData))
+	get_token_struct := get_token{}
+	xml.Unmarshal(responseData, &get_token_struct)
+	if get_token_struct.Error_code == 0 {
+		b.token = get_token_struct.Token
+	}
+
+}
+
+func (b BPM) Select_data() {
+	ra := envelope{}
+	fmt.Println(ra)
+	by, _ := xml.Marshal(ra)
+	fmt.Println(string(by))
 }
 
 func (b BPM) create_post_req(act string, i ...interface{}) *http.Request {

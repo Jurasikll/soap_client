@@ -39,9 +39,8 @@ var set settings
 func main() {
 	toml.DecodeFile(CONFIG_PATH, &set)
 	fmt.Scanln()
-	fmt.Println(set.Conn_settings.Req_url)
 	bpm_client := bpm.Init(set.Conn_settings.User, set.Conn_settings.Pwd, set.Conn_settings.Crypty, set.Conn_settings.Time, set.Conn_settings.Req_url, set.Soap_act)
-	fmt.Println(bpm_client)
+	bpm_client.Select_data()
 	//	post_req(set.Req.Auth_url, fmt.Sprintf(set.Req.Auth_xml, set.Server.Access_data.User, set.Server.Access_data.Pwd, set.Server.Access_data.Time), set.Req.Def_headers_map())
 	//	test_simple_req()
 	fmt.Scanln()
