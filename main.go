@@ -4,9 +4,11 @@ package main
 import (
 	"fmt"
 
-	"soap_client/bpm"
+	//	"soap_client/bpm"
+	"soap_client/gen"
 
 	"github.com/BurntSushi/toml"
+	"github.com/fiorix/wsdl2go/soap"
 )
 
 const (
@@ -15,8 +17,8 @@ const (
 
 type settings struct {
 	Conn_settings conn_settings
-	Req           request_settings             `toml:"request_settings"`
-	Soap_act      map[string]*bpm.Soap_actions `toml:"soap_actions"`
+	Req           request_settings `toml:"request_settings"`
+	//	Soap_act      map[string]*bpm.Soap_actions `toml:"soap_actions"`
 }
 
 type conn_settings struct {
@@ -39,8 +41,11 @@ var set settings
 func main() {
 	toml.DecodeFile(CONFIG_PATH, &set)
 	fmt.Scanln()
-	bpm_client := bpm.Init(set.Conn_settings.User, set.Conn_settings.Pwd, set.Conn_settings.Crypty, set.Conn_settings.Time, set.Conn_settings.Req_url, set.Soap_act)
-	bpm_client.Select_data()
+	sc := soap.Client{}
+	t := gen.NewDataServiceHttpPost(&sc)
+	fmt.Println(t)
+	//	bpm_client := bpm.Init(set.Conn_settings.User, set.Conn_settings.Pwd, set.Conn_settings.Crypty, set.Conn_settings.Time, set.Conn_settings.Req_url, set.Soap_act)
+	//	bpm_client.Select_data()
 	//	post_req(set.Req.Auth_url, fmt.Sprintf(set.Req.Auth_xml, set.Server.Access_data.User, set.Server.Access_data.Pwd, set.Server.Access_data.Time), set.Req.Def_headers_map())
 	//	test_simple_req()
 	fmt.Scanln()
