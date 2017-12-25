@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
+//	"strings"
+"bytes"
 
 	//	"github.com/pborman/uuid"
 )
@@ -14,14 +15,17 @@ type BPM struct {
 	user    string
 	pwd     string
 	crypty  string
+	soap    string
+	xmlns   string
 	time    int
 	req_url string
 	actions map[string]*Soap_actions
 	token   string
 	client  http.Client
+	ra      env_entity
 }
 
-func Init(user string, pwd string, crypty string, time int, req_url string, actions map[string]*Soap_actions) BPM {
+func Init(user string, pwd string, crypty string, time int, req_url string, soap string, xmlns string, actions map[string]*Soap_actions) BPM {
 	b := BPM{}
 	b.user = user
 	b.pwd = pwd
@@ -29,6 +33,9 @@ func Init(user string, pwd string, crypty string, time int, req_url string, acti
 	b.time = time
 	b.req_url = req_url
 	b.actions = actions
+	b.soap = soap
+	b.xmlns = xmlns
+	b.ra := env_entity{}
 	b.client = http.Client{}
 	b.get_token()
 	return b
@@ -36,10 +43,7 @@ func Init(user string, pwd string, crypty string, time int, req_url string, acti
 
 func (b *BPM) get_token() {
 	act := "get_token"
-
-	req_struct := get_login_struct()
-	fmt.Println(req_struct.Body.Run_login.Xmlns)
-
+	b.ra.create_login(b.soap, b.crypty, b.time, b.user, b.pwd, b.xmlns)
 	req := b.create_post_req(act, b.user, b.pwd, b.time, b.crypty)
 	resp, _ := b.client.Do(req)
 	responseData, _ := ioutil.ReadAll(resp.Body)
@@ -52,10 +56,10 @@ func (b *BPM) get_token() {
 }
 
 func (b BPM) Select_data() {
-	ra := envelope{}.init_select()
-	fmt.Println(ra)
-	by, _ := xml.Marshal(ra)
-	fmt.Println(string(by))
+	ra := env_entity{}
+	ra.create_login(b.soap, b.crypty, b.time, b.user, b.pwd, b.xmlns)
+	fmt.Printf("%v\r\n", ra)
+	fmt.Println(ra.get_xml())
 }
 
 func (b BPM) create_post_req(act string, i ...interface{}) *http.Request {
