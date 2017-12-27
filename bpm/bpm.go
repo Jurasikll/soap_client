@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-//	"strings"
-"bytes"
+	//	"strings"
+	"bytes"
 
 	//	"github.com/pborman/uuid"
 )
@@ -35,7 +35,7 @@ func Init(user string, pwd string, crypty string, time int, req_url string, soap
 	b.actions = actions
 	b.soap = soap
 	b.xmlns = xmlns
-	b.ra := env_entity{}
+	b.ra = env_entity{}
 	b.client = http.Client{}
 	b.get_token()
 	return b
@@ -44,7 +44,7 @@ func Init(user string, pwd string, crypty string, time int, req_url string, soap
 func (b *BPM) get_token() {
 	act := "get_token"
 	b.ra.create_login(b.soap, b.crypty, b.time, b.user, b.pwd, b.xmlns)
-	req := b.create_post_req(act, b.user, b.pwd, b.time, b.crypty)
+	req := b.create_post_req(act, b.ra.get_xml())
 	resp, _ := b.client.Do(req)
 	responseData, _ := ioutil.ReadAll(resp.Body)
 	get_token_struct := get_token{}
@@ -62,9 +62,9 @@ func (b BPM) Select_data() {
 	fmt.Println(ra.get_xml())
 }
 
-func (b BPM) create_post_req(act string, i ...interface{}) *http.Request {
-	req_body := fmt.Sprintf(b.actions[act].Body_ptr, i...)
-	req, _ := http.NewRequest("POST", b.req_url, strings.NewReader(req_body))
+func (b BPM) create_post_req(act string, body []byte) *http.Request {
+	//	req_body := fmt.Sprintf(b.actions[act].Body_ptr, i...)
+	req, _ := http.NewRequest("POST", b.req_url, bytes.NewReader(body))
 
 	headers := b.actions[act].Def_headers_map()
 	for name, val := range headers {
